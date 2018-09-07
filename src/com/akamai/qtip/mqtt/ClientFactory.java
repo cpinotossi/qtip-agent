@@ -6,12 +6,13 @@ import javax.net.ssl.SSLSocketFactory;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import com.akamai.qtip.jwt.IECJWTBuilder;
 
 public class ClientFactory {
 	public static MqttClient getIECClient(URI broker, String clientId, String[] authGroups) throws Exception {
-		MqttClient client = new MqttClient(broker.toString(), clientId);
+		MqttClient client = new MqttClient(broker.toString(), clientId, new MemoryPersistence());
 
         MqttConnectOptions connOpts = new MqttConnectOptions();
 
