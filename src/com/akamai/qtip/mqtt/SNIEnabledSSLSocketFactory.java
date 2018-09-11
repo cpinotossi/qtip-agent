@@ -1,5 +1,4 @@
 package com.akamai.qtip.mqtt;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;

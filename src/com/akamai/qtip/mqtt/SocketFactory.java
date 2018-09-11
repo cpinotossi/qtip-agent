@@ -26,7 +26,8 @@ public class SocketFactory {
 	public static SSLSocketFactory getSNISocketFactory(String hostName) throws Exception {
 		SSLContext context = SSLContext.getInstance("TLSv1");
 
-		TrustManager[] trustAllCerts = new TrustManager[] { (TrustManager) new X509TrustManager() {
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			@Override
 			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
 				return null;
 			}

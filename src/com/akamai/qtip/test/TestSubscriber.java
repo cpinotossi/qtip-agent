@@ -1,13 +1,14 @@
-package com.akamai.qtip;
-
-import java.net.URI;
+package com.akamai.qtip.test;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import com.akamai.qtip.mqtt.ClientFactory;
+import com.akamai.qtip.Broker;
+import com.akamai.qtip.mqtt.iec.ClientBuilder;
+import com.akamai.qtip.mqtt.iec.Jurisdiction;
+
 
 public class TestSubscriber {
 
@@ -19,11 +20,6 @@ public class TestSubscriber {
 		if (System.getenv("JWT_SIGNING_KEY") == null) {
 			throw new Exception("Expects JWT_SIGNING_KEY env var to be set.");
 		}
-
-		URI broker = new URI("ssl://qtip-eu.a2s.ninja:8883");
-		String clientId = "qtipSubOne";
-		String[] authGroups = new String[] {"chatter:sub"};
-		MqttClient client = ClientFactory.getIECClient(broker, clientId, authGroups);
 
 		//callback functions defined, when certain MQTT events take place
         MqttCallback callback = new MqttCallback() {
@@ -44,8 +40,15 @@ public class TestSubscriber {
         				System.exit(0);
         	}
         };
-        
-        client.setCallback(callback);      
+
+		ClientBuilder clientBuilder = new ClientBuilder();
+		MqttClient client = clientBuilder.addAuthGroup("chatter:sub")
+			.setClientId("qtipSubOne")
+			.setBrokerURI(Broker.getURI(Jurisdiction.EU))
+			.setCallback(callback)
+			.build();
+
+		client.connect();
 		client.subscribe("chatter");
 	}
 }

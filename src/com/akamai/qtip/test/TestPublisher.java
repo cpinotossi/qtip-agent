@@ -1,10 +1,10 @@
-package com.akamai.qtip;
-
-import java.net.URI;
+package com.akamai.qtip.test;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 
-import com.akamai.qtip.mqtt.ClientFactory;
+import com.akamai.qtip.Broker;
+import com.akamai.qtip.mqtt.iec.ClientBuilder;
+import com.akamai.qtip.mqtt.iec.Jurisdiction;
 
 public class TestPublisher {
 
@@ -17,11 +17,13 @@ public class TestPublisher {
 			throw new Exception("Expects JWT_SIGNING_KEY env var to be set.");
 		}
 
-		URI broker = new URI("ssl://qtip-eu.a2s.ninja:8883");
-		String clientId = "qtipPubOne";
-		String[] authGroups = new String[] {"chatter:pub"};
-		MqttClient client = ClientFactory.getIECClient(broker, clientId, authGroups);
+		ClientBuilder clientBuilder = new ClientBuilder();
+		MqttClient client = clientBuilder.addAuthGroup("chatter:pub")
+			.setClientId("qtipPubOne")
+			.setBrokerURI(Broker.getURI(Jurisdiction.EU))
+			.build();
 
+		client.connect();
 		client.publish("chatter", "hello!!!!".getBytes(), 2, false);
 		client.disconnect();
         System.exit(0);

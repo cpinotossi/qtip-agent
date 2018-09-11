@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package com.akamai.qtip;
+
+import "any.proto";
+
+message AgentDescriptor {
+
+	string clientId = 1;
+	string type = 2;
+	float lat = 3;
+	float lon = 4;
+}
+
+message PublisherBeacon {
+	string testId = 1;
+	uint64 publishTime = 2;
+	uint64 deliverTime = 3;
+}
+
+message SubscriberBeacon {
+	string testId = 1;
+	uint64 notifyTime = 2;
+	uint64 doneTime = 3;
+}
+
+message Envelope {
+	AgentDescriptor sender = 1;
+	google.protobuf.Any payload = 2;
+}
