@@ -8,7 +8,6 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
-import com.akamai.qtip.Agent;
 import com.akamai.qtip.Messages.Envelope;
 import com.akamai.qtip.Topic;
 

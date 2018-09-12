@@ -13,7 +13,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import com.akamai.qtip.jwt.IECJWTBuilder;
 import com.akamai.qtip.mqtt.SocketFactory;
 
 public class ClientBuilder {
@@ -54,6 +53,7 @@ public class ClientBuilder {
 
 	private URI brokerURI;
 	private String clientId;
+	private String jwt;
 	private MqttClientPersistence persistence = new MemoryPersistence();
 	private MqttCallback callback;
 	private List<String> authGroups;
@@ -86,25 +86,19 @@ public class ClientBuilder {
 		return this;
 	}
 
-	public MqttClient build() throws Exception {
+	public void setJWT(String jwt) {
+		this.jwt = jwt;	
+	}
 
-		if (clientId == null) {
-			clientId = MqttClient.generateClientId();
-		}
+	public MqttClient build() throws Exception {
 
 		MqttClientWithConnectOptions client = new MqttClientWithConnectOptions(brokerURI.toString(), clientId,
 				this.persistence);
 
-		// build the JWT token based on a private RSA key provided through an
-		// environment var
-		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
-		jwtBuilder.setClientId(clientId).setAuthGroups(authGroups.toArray(new String[] {}))
-				.setSigningKey(System.getenv("JWT_SIGNING_KEY"));
-
 		// update the connection with credentials
 		MqttConnectOptions connectOptions = new MqttConnectOptions();
 		connectOptions.setUserName(clientId); // this is ignored by IEC, we provide the clientId arbitrarily
-		connectOptions.setPassword(jwtBuilder.build().toCharArray());
+		connectOptions.setPassword(jwt.toCharArray());
 
 		// extract hostname from broker URL and create socket factory
 		SSLSocketFactory ssf = SocketFactory.getSNISocketFactory(brokerURI.getHost());
@@ -116,5 +110,12 @@ public class ClientBuilder {
 		}
 
 		return client;
+	}
+
+	public ClientBuilder addAuthGroups(String[] authGroups) {
+		for (int i = 0; i < authGroups.length; i++) {
+			this.addAuthGroup(authGroups[i]);
+		}
+		return this;
 	}
 }

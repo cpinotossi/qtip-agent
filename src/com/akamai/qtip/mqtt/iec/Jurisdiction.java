@@ -18,5 +18,9 @@ public enum Jurisdiction {
 		public String toString() {
 			return "us";
 		}
+	};
+
+	static public Jurisdiction getDefault() {
+		return EU;
 	}
 }

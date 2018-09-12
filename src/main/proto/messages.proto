@@ -5,11 +5,19 @@ package com.akamai.qtip;
 import "any.proto";
 
 message AgentDescriptor {
-
 	string clientId = 1;
 	string type = 2;
 	float lat = 3;
 	float lon = 4;
+}
+
+message StartTest {
+	string testId = 1;
+	string brokerUri = 2;
+}
+
+message AbortTest {
+	string testId = 1;
 }
 
 message PublisherBeacon {

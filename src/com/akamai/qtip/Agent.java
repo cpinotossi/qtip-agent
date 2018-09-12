@@ -1,74 +1,90 @@
 package com.akamai.qtip;
 
-import java.util.logging.Logger;
-
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-
+import com.akamai.qtip.Messages.AgentDescriptor;
 import com.akamai.qtip.Messages.Envelope;
-import com.akamai.qtip.Messages.PublisherBeacon;
 import com.akamai.qtip.mqtt.AsyncPublisher;
-import com.akamai.qtip.mqtt.iec.ClientBuilder;
 import com.akamai.qtip.mqtt.iec.Jurisdiction;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 
 public class Agent implements Runnable, MqttCallback {
+	private MqttClient mqtt;
+	private AsyncPublisher chatterPublisher;
+	private AsyncPublisher beaconPublisher;
 
-	private MqttClient mqttClient;
 
 	public Agent() throws Exception {
-		mqttClient = createMqttClient();
-	}
-
-	private MqttClient createMqttClient() throws Exception {
-		ClientBuilder clientBuilder = new ClientBuilder();
-		clientBuilder.setBrokerURI(Broker.getURI(getJurisdiction()))
-			.setCallback(this)
-			.addAuthGroup("chatter:pub")
-			.addAuthGroup("chatter:sub")
-			.addAuthGroup("measures:pub")
-			.addAuthGroup("measures:sub");
-		return clientBuilder.build();
+		mqtt = IEC.mqttClient(getJurisdiction(), new String[] {"chatter:pub", "chatter:sub", "measures:pub", "measures:sub"});
+		chatterPublisher = new AsyncPublisher(mqtt, Topic.CHATTER);
+		beaconPublisher = new AsyncPublisher(mqtt, Topic.BEACONS);
 	}
 
 	public Jurisdiction getJurisdiction() {
-		// FIXME: select this based on DNS? GTM?
-		return Jurisdiction.EU;
+		// FIXME: select jurisdiction based on DNS? GTM?
+		return Jurisdiction.getDefault();
 	}
 
-	public MqttClient getMqttClient() {
-		return mqttClient;
+	public AgentDescriptor getDescriptor() {
+		return AgentDescriptor.newBuilder()
+				.setClientId(mqtt.getClientId())
+				// TODO: retrieve edgescape data from https://qtip.a2s.ninja/whereami
+				.setLat(0)
+				.setLon(0)
+				.build();
+	}
+
+	private Envelope envelop(Message message) {
+		return Envelope.newBuilder()
+				.setSender(getDescriptor())
+				.setPayload(Any.pack(message))
+				.build();
+	}
+
+	public void publishChatter(Message message) throws MqttException {
+		chatterPublisher.publish(envelop(message));
+	}
+
+	public void publishBeacon(Message message) throws MqttException {
+		beaconPublisher.publish(envelop(message));
 	}
 
 	@Override
 	public void run() {
+		mqtt.setCallback(this);
+//		if (this.isAggregator()) {
+//			this.startAggregator(); // new Aggregator(this);
+//		}
 		try {
-			mqttClient.connect();
+			mqtt.subscribe(Topic.CHATTER.toString());
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
-			Logger.getLogger(this.getClass().getName()).fine("Timed out waiting for a beacon to send...");
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void connectionLost(Throwable cause) {
-		Logger.getLogger(this.getClass().getName()).severe("Lost connection...");
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
 		Envelope e = Envelope.parseFrom(message.getPayload());
-		Any payload = e.getPayload();
-		if (payload.is(PublisherBeacon.class)) {
-			PublisherBeacon pb = payload.unpack(PublisherBeacon.class);
-		}
+//		Any payload = e.getPayload();
+//		if (payload.getClass() == StartTest) {
+//			this.startTest();
+//		}
 	}
 
 	@Override
 	public void deliveryComplete(IMqttDeliveryToken token) {
 		// TODO Auto-generated method stub
+		
 	}
 }
