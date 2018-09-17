@@ -9,7 +9,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 import com.akamai.qtip.Messages.Envelope;
+import com.akamai.qtip.IEC;
 import com.akamai.qtip.Topic;
+import com.akamai.qtip.mqtt.iec.Jurisdiction;
 
 /**
  * Thread that consumes a queue of Envelope instances to be sent
@@ -22,8 +24,8 @@ public class AsyncPublisher extends Thread {
 	private LinkedBlockingQueue<Envelope> queue;
 	private Topic topic;
 
-	public AsyncPublisher(MqttClient client, Topic topic) throws Exception {
-		this.client = client;
+	public AsyncPublisher(Jurisdiction jurisdiction, String[] authGroups, Topic topic) throws Exception {
+		this.client = IEC.mqttClient(jurisdiction, authGroups);
 		this.setName(this.getClass().getName());
 		this.topic = topic;
 		this.queue = new LinkedBlockingQueue<Envelope>();

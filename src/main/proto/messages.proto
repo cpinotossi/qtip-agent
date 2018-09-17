@@ -11,6 +11,12 @@ message AgentDescriptor {
 	float lon = 4;
 }
 
+message Who {
+}
+
+message Hello {
+}
+
 message StartTest {
 	string testId = 1;
 	string brokerUri = 2;
@@ -18,6 +24,10 @@ message StartTest {
 
 message AbortTest {
 	string testId = 1;
+}
+
+message StartPublish{
+
 }
 
 message PublisherBeacon {
