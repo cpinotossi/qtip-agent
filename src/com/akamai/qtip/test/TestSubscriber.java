@@ -6,6 +6,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.akamai.qtip.Broker;
+import com.akamai.qtip.jwt.IECJWTBuilder;
 import com.akamai.qtip.mqtt.iec.ClientBuilder;
 import com.akamai.qtip.mqtt.iec.Jurisdiction;
 
@@ -41,11 +42,17 @@ public class TestSubscriber {
         	}
         };
 
+		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
+		jwtBuilder.setAuthGroups(new String[] { "chatter:sub" })
+			.setSigningKey(System.getenv("JWT_SIGNING_KEY"));
+		String jwt = jwtBuilder.build();
+
 		ClientBuilder clientBuilder = new ClientBuilder();
 		MqttClient client = clientBuilder.addAuthGroup("chatter:sub")
+			.setCallback(callback)
 			.setClientId("qtipSubOne")
 			.setBrokerURI(Broker.getURI(Jurisdiction.EU))
-			.setCallback(callback)
+			.setJWT(jwt)
 			.build();
 
 		client.connect();

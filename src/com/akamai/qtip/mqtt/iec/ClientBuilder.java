@@ -1,6 +1,7 @@
 package com.akamai.qtip.mqtt.iec;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -58,6 +59,10 @@ public class ClientBuilder {
 	private MqttCallback callback;
 	private List<String> authGroups;
 
+	public ClientBuilder() {
+		this.authGroups = new ArrayList<String>();
+	}
+
 	public ClientBuilder setPersistence(MqttClientPersistence persistence) {
 		this.persistence = persistence;
 		return this;
@@ -69,7 +74,7 @@ public class ClientBuilder {
 	}
 
 	public ClientBuilder setClientId(String clientId) throws Exception {
-		if (!clientId.matches("[a-z0-9]{0,23}")) {
+		if (!clientId.matches("[a-zA-Z0-9]{0,23}")) {
 			throw new Exception(String.format("Invalid client id, expecting /[a-z0-9]{0,23}/, got %s", clientId));
 		}
 		this.clientId = clientId;
@@ -86,8 +91,9 @@ public class ClientBuilder {
 		return this;
 	}
 
-	public void setJWT(String jwt) {
+	public ClientBuilder setJWT(String jwt) {
 		this.jwt = jwt;	
+		return this;
 	}
 
 	public MqttClient build() throws Exception {
