@@ -15,6 +15,7 @@ import com.akamai.qtip.Messages.*;
 import com.akamai.qtip.mqtt.AsyncPublisher;
 import com.akamai.qtip.mqtt.iec.Jurisdiction;
 import com.akamai.qtip.publishtest.PublishTestManager;
+import com.akamai.qtip.subscribetest.SubscribeTestManager;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
@@ -72,8 +73,20 @@ public class Agent implements Runnable, MqttCallback {
 	}
 
 	private void setupSubscribeTest() {
-		// TODO Auto-generated method stub
-		
+		SubscribeTestManager manager = new SubscribeTestManager(this);
+		registerHandler(new MessageHandler<StartTest>() {
+			@Override
+			protected void handle(AgentDescriptor sender, StartTest message) throws Exception {
+				manager.startTest(message);
+			}
+		});
+		registerHandler(new MessageHandler<AbortTest>() {
+			@Override
+			protected void handle(AgentDescriptor sender, AbortTest message) throws Exception {
+				manager.abortTest(message.getTestId());
+			}
+		});
+		// TODO abort on CLOSE TEST message
 	}
 
 	private void setupAggregator() {
@@ -102,11 +115,11 @@ public class Agent implements Runnable, MqttCallback {
 				.build();
 	}
 
-	public void publishChatter(Message message) throws MqttException {
+	public void publishChatter(Message message) {
 		chatterPublisher.publish(envelop(message));
 	}
 
-	public void publishBeacon(Message message) throws MqttException {
+	public void publishBeacon(Message message) {
 		beaconPublisher.publish(envelop(message));
 	}
 
