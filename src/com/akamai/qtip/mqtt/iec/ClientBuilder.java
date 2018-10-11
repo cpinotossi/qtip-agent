@@ -74,9 +74,9 @@ public class ClientBuilder {
 	}
 
 	public ClientBuilder setClientId(String clientId) throws Exception {
-		if (!clientId.matches("[a-zA-Z0-9]{0,23}")) {
-			throw new Exception(String.format("Invalid client id, expecting /[a-z0-9]{0,23}/, got %s", clientId));
-		}
+		//if (!clientId.matches("[a-zA-Z0-9]{0,23}")) {
+		//	throw new Exception(String.format("Invalid client id, expecting /[a-z0-9]{0,23}/, got %s", clientId));
+		//}
 		this.clientId = clientId;
 		return this;
 	}

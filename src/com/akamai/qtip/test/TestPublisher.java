@@ -1,5 +1,7 @@
 package com.akamai.qtip.test;
 
+import java.time.Instant;
+
 import org.eclipse.paho.client.mqttv3.MqttClient;
 
 import com.akamai.qtip.Broker;
@@ -31,7 +33,10 @@ public class TestPublisher {
 			.build();
 
 		client.connect();
-		client.publish("chatter", "hello!!!!".getBytes(), 2, false);
+		Instant instant = Instant.now();
+		long timeStampMillis = instant.toEpochMilli();
+		String msg = "hello!!! current epoche time is "+timeStampMillis;
+		client.publish("chatter", msg.getBytes(), 2, false);
 		client.disconnect();
         System.exit(0);
 	}
