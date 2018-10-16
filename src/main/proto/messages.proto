@@ -42,6 +42,14 @@ message SubscriberBeacon {
 	uint64 doneTime = 3;
 }
 
+message StartSubscribe {
+	string testId = 1;
+}
+
+message SubscriberBail{
+	string testId = 1;
+}
+
 message Envelope {
 	AgentDescriptor sender = 1;
 	google.protobuf.Any payload = 2;
