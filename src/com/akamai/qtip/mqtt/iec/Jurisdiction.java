@@ -13,10 +13,10 @@ public enum Jurisdiction {
 			return "jp";
 		}
 	},
-	US {
+	NA {
 		@Override
 		public String toString() {
-			return "us";
+			return "na";
 		}
 	};
 

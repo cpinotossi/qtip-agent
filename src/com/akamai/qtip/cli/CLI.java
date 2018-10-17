@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Scanner;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -12,17 +11,16 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.akamai.qtip.Broker;
+import com.akamai.qtip.cli.commands.CommandClientMQTT;
+import com.akamai.qtip.cli.commands.Commands;
 import com.akamai.qtip.jwt.IECJWTBuilder;
 import com.akamai.qtip.mqtt.iec.ClientBuilder;
 import com.akamai.qtip.mqtt.iec.Jurisdiction;
-//import com.akamai.edgeauth.AkamaiTokenConfig;
-//import com.akamai.edgeauth.AkamaiTokenGenerator;
 import com.beust.jcommander.JCommander;
 
-//TODO ota api support
-public class QtipCLI {
 
-	@SuppressWarnings("static-access")
+public class CLI {
+
 	public static void main(String[] args) throws Exception {
 		if (null == args || args.length == 0) {
 			System.out.println("try '--help' or '-h' for more information");
@@ -30,8 +28,10 @@ public class QtipCLI {
 		}
 		// Read user input parameter.
 		Commands commands = new Commands();
+		CommandClientMQTT commandClientMQTT = new CommandClientMQTT();
 		JCommander jc = new JCommander();
 		jc.addObject(commands);
+		jc.addCommand("mqtt", commandClientMQTT);
 		try {
 			jc.parse(args);
 		} catch (Exception e) {
@@ -39,12 +39,19 @@ public class QtipCLI {
 			jc.usage();
 			System.exit(1);
 		}
+		String currentCmd = jc.getParsedCommand();
 
-		QtipCLI cli = new QtipCLI();
-		if (commands.publish) {
-			cli.publish(commands.clientid, commands.authgroup, commands.topic, commands.message, commands.key);
-		} else {
-			cli.subscribe(commands.clientid, commands.authgroup, commands.topic, commands.key);
+		switch (currentCmd) {
+		case "mqtt":
+			CLI cli = new CLI();
+			if (commandClientMQTT.publish) {
+				cli.publish(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic, commandClientMQTT.message, commandClientMQTT.key);
+			} else {
+				cli.subscribe(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic, commandClientMQTT.key);
+			}	
+			break; // optional	
+		default: // default
+			System.out.println("please use a command:");
 		}
 	}
 
@@ -119,7 +126,7 @@ public class QtipCLI {
 		client.subscribe(topic);
 	}
 	
-	private static String getKey(String filename) throws IOException {
+	private String getKey(String filename) throws IOException {
 	    // Read key from file
 	    String strKeyPEM = "";
 	    BufferedReader br = new BufferedReader(new FileReader(filename));
