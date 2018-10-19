@@ -3,6 +3,7 @@ package com.akamai.qtip.cli;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -44,10 +45,11 @@ public class CLI {
 		switch (currentCmd) {
 		case "mqtt":
 			CLI cli = new CLI();
+			URI uri = new URI(String.format("ssl://%s:8883", commandClientMQTT.domain));
 			if (commandClientMQTT.publish) {
-				cli.publish(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic, commandClientMQTT.message, commandClientMQTT.key);
+				cli.publish(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic, commandClientMQTT.message, commandClientMQTT.key, commandClientMQTT.repeat, uri);
 			} else {
-				cli.subscribe(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic, commandClientMQTT.key);
+				cli.subscribe(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic, commandClientMQTT.key,uri);
 			}	
 			break; // optional	
 		default: // default
@@ -55,15 +57,18 @@ public class CLI {
 		}
 	}
 
-	public void publish(String clientId, String authGroup, String topic, String message, String pathtothekey) throws Exception {
+	public void publish(String clientId, String authGroup, String topic, String message, String pathtothekey, URI uri) throws Exception {
+		publish(clientId, authGroup, topic, message, pathtothekey, 1, uri);
+	}
+	
+	public void publish(String clientId, String authGroup, String topic, String message, String pathtothekey, int repeat, URI uri) throws Exception {
 		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
 		jwtBuilder.setAuthGroups(new String[] { authGroup }).setSigningKey(getKey(pathtothekey));
 		String jwt = jwtBuilder.build();
-
 		ClientBuilder clientBuilder = new ClientBuilder();
 		MqttClient client = clientBuilder.addAuthGroup(authGroup)
 				.setClientId(clientId)
-				.setBrokerURI(Broker.getURI(Jurisdiction.EU))
+				.setBrokerURI(uri)
 				.setJWT(jwt)
 				.build();
 
@@ -72,7 +77,7 @@ public class CLI {
 		System.out.println(clientId);
 		System.out.println(authGroup);
 		System.out.println(topic);
-		System.out.println(Jurisdiction.EU.toString());
+		System.out.println(uri);
 		System.out.println(jwt);
 		System.out.println("connect");
 		
@@ -80,12 +85,15 @@ public class CLI {
 		Instant instant = Instant.now();
 		long timeStampMillis = instant.toEpochMilli();
 		String msg = "["+timeStampMillis+"]:"+message;
-		client.publish(topic, msg.getBytes(), 2, false);
+		for(int i = 0; i<repeat;i++) {
+			System.out.println("Repeat#"+i+" msg:"+msg);
+			client.publish(topic, msg.getBytes(), 2, false);
+		}
 		client.disconnect();
 		System.exit(0);
 	}
 
-	public void subscribe(String clientId, String authGroup, String topic, String pathtothekey) throws Exception {
+	public void subscribe(String clientId, String authGroup, String topic, String pathtothekey, URI uri) throws Exception {
 		// callback functions defined, when certain MQTT events take place
 		MqttCallback callback = new MqttCallback() {
 			@Override
@@ -111,14 +119,17 @@ public class CLI {
 		
 
 		ClientBuilder clientBuilder = new ClientBuilder();
-		MqttClient client = clientBuilder.addAuthGroup(authGroup).setCallback(callback).setClientId(clientId)
-				.setBrokerURI(Broker.getURI(Jurisdiction.EU)).setJWT(jwt).build();
+		MqttClient client = clientBuilder.addAuthGroup(authGroup).
+				setCallback(callback)
+				.setClientId(clientId)
+				.setBrokerURI(uri)
+				.setJWT(jwt).build();
 
 		System.out.println("START subscribe");
 		System.out.println(clientId);
 		System.out.println(authGroup);
 		System.out.println(topic);
-		System.out.println(Jurisdiction.EU.toString());
+		System.out.println(uri);
 		System.out.println(jwt);
 		System.out.println("connect");
 

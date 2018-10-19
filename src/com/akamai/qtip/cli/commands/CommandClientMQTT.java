@@ -23,4 +23,10 @@ public class CommandClientMQTT {
     
     @Parameter(names = {"--key","-k"}, description = "Path to the key file", required = true)
 	public String key;
+    
+    @Parameter(names = {"--domain","-d"}, description = "Domain/Hostname of the mqtt server", required = true)
+	public String domain;
+    
+    @Parameter(names = {"--repeat","-r"}, description = "Number of times to repeate the message", required = false)
+	public int repeat = 1;
 }
