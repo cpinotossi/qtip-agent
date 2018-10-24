@@ -235,7 +235,7 @@ java -jar qtipcli.jar rns --edgerc /Users/cpinotos/.edgerc  -t list-all -m iec_h
 ]
 ```
 
-####CLI mqtt example nsc (Manage Akamai Reserved Namespace)
+#### CLI mqtt example nsc (Manage Akamai Reserved Namespace)
 ##### List all jurisdiction of Namespace Configuration "iec_hebe_io"
 ```
 java -jar qtipcli.jar nsc --edgerc /Users/cpinotos/.edgerc -t list-all -n iec_hebe_io
