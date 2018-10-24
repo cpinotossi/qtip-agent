@@ -8,6 +8,11 @@ import com.akamai.qtip.cli.commands.iec.CommandManageReservedNamespace;
 import com.akamai.qtip.cli.commands.services.iec.MQTTService;
 import com.akamai.qtip.cli.commands.services.iec.NamespaceService;
 import com.beust.jcommander.JCommander;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import java.net.URI;
 
 public class CLI {
@@ -39,33 +44,10 @@ public class CLI {
 
 		String currentCmd = jc.getParsedCommand();
 		NamespaceService ns = null;
-		byte var10 = -1;
-		switch (currentCmd.hashCode()) {
-			case 109374 :
-				if (currentCmd.equals("nsc")) {
-					var10 = 2;
-				}
-				break;
-			case 113079 :
-				if (currentCmd.equals("rns")) {
-					var10 = 1;
-				}
-				break;
-			case 3359524 :
-				if (currentCmd.equals("mqtt")) {
-					var10 = 0;
-				}
-				break;
-			case 3390712 :
-				if (currentCmd.equals("nscv")) {
-					var10 = 3;
-				}
-		}
 
-		String var13;
-		byte var14;
-		switch (var10) {
-			case 0 :
+
+		switch (currentCmd) {
+			case "mqtt" :
 				MQTTService iecClient = new MQTTService();
 				URI uri = new URI(String.format("ssl://%s:8883", commandClientMQTT.domain));
 				if (commandClientMQTT.publish) {
@@ -76,176 +58,100 @@ public class CLI {
 							commandClientMQTT.topic, commandClientMQTT.key, uri);
 				}
 				break;
-			case 1 :
+			case "rns" :
 				ns = new NamespaceService(commandReservedNamespace.section, commandReservedNamespace.edgerc);
-				var13 = commandReservedNamespace.type;
-				var14 = -1;
-				switch (var13.hashCode()) {
-					case 3322014 :
-						if (var13.equals("list")) {
-							var14 = 0;
-						}
-						break;
-					case 1097075900 :
-						if (var13.equals("reserve")) {
-							var14 = 1;
-						}
-						break;
-					case 1344479218 :
-						if (var13.equals("list-all")) {
-							var14 = 2;
-						}
-				}
-
-				switch (var14) {
-					case 0 :
-						System.out.println(ns.getListReservedNamespaces(Integer.toString(commandReservedNamespace.size),
-								Integer.toString(commandReservedNamespace.page)));
+				switch (commandReservedNamespace.type) {
+					case "list" :
+						System.out.println(jsonPrettyPrint(ns.getListReservedNamespaces(Integer.toString(commandReservedNamespace.size),
+								Integer.toString(commandReservedNamespace.page))));
 						System.exit(0);
 						return;
-					case 1 :
-						System.out.println(ns.postReserveNamespace(commandReservedNamespace.requestBody));
+					case "reserve" :
+						System.out.println(jsonPrettyPrint(ns.postReserveNamespace(commandReservedNamespace.requestBody)));
 						System.exit(0);
 						return;
-					case 2 :
-						System.out.println(ns.getListAllReservedNamespaces(
+					case "list-all" :
+						System.out.println(jsonPrettyPrint(ns.getListAllReservedNamespaces(
 								Boolean.toString(commandReservedNamespace.global), commandReservedNamespace.match,
-								Boolean.toString(commandReservedNamespace.detail)));
+								Boolean.toString(commandReservedNamespace.detail))));
 						System.exit(0);
 						return;
 					default :
 						return;
 				}
-			case 2 :
-				ns = new NamespaceService(commandNamespaceConfiguration.namespace,
+			case "nsc" :
+				ns = new NamespaceService(commandNamespaceConfiguration.section,
 						commandNamespaceConfiguration.edgerc);
-				var13 = commandNamespaceConfiguration.type;
-				var14 = -1;
-				switch (var13.hashCode()) {
-					case -1352294148 :
-						if (var13.equals("create")) {
-							var14 = 1;
-						}
-						break;
-					case -1335458389 :
-						if (var13.equals("delete")) {
-							var14 = 4;
-						}
-						break;
-					case -838846263 :
-						if (var13.equals("update")) {
-							var14 = 3;
-						}
-						break;
-					case 102230 :
-						if (var13.equals("get")) {
-							var14 = 2;
-						}
-						break;
-					case 1344479218 :
-						if (var13.equals("list-all")) {
-							var14 = 0;
-						}
-				}
-
-				switch (var14) {
-					case 0 :
-						System.out.println(
-								ns.getListAllNamespaceConfigurations(commandNamespaceConfigurationVersion.namespace));
+				switch (commandNamespaceConfiguration.type) {
+					case "list-all" :
+						System.out.println(jsonPrettyPrint(
+								ns.getListAllNamespaceConfigurations(commandNamespaceConfiguration.namespace)));
 						System.exit(0);
 						return;
-					case 1 :
-						System.out.println(
-								ns.postCreateNamespaceConfiguration(commandNamespaceConfigurationVersion.namespace,
-										commandNamespaceConfigurationVersion.requestBody));
+					case "create" :
+						System.out.println(jsonPrettyPrint(
+								ns.postCreateNamespaceConfiguration(commandNamespaceConfiguration.namespace,
+										commandNamespaceConfiguration.requestBody)));
 						System.exit(0);
 						return;
-					case 2 :
-						System.out.println(ns.getNamespaceConfiguration(commandNamespaceConfigurationVersion.namespace,
-								commandNamespaceConfigurationVersion.jurisdiction));
+					case "get" :
+						System.out.println(jsonPrettyPrint(ns.getNamespaceConfiguration(commandNamespaceConfiguration.namespace,
+								commandNamespaceConfiguration.jurisdiction)));
 						System.exit(0);
 						return;
-					case 3 :
-						System.out.println(
-								ns.putUpdateNamespaceConfiguration(commandNamespaceConfigurationVersion.namespace,
-										commandNamespaceConfigurationVersion.jurisdiction,
-										commandNamespaceConfigurationVersion.requestBody));
+					case "update" :
+						System.out.println(jsonPrettyPrint(
+								ns.putUpdateNamespaceConfiguration(commandNamespaceConfiguration.namespace,
+										commandNamespaceConfiguration.jurisdiction,
+										commandNamespaceConfiguration.requestBody)));
 						System.exit(0);
 						return;
-					case 4 :
+					case "delete" :
 						System.out
-								.println(ns.deleteNamespaceConfiguration(commandNamespaceConfigurationVersion.namespace,
-										commandNamespaceConfigurationVersion.jurisdiction));
+								.println(jsonPrettyPrint(ns.deleteNamespaceConfiguration(commandNamespaceConfiguration.namespace,
+										commandNamespaceConfiguration.jurisdiction)));
 						System.exit(0);
 						return;
 					default :
 						return;
 				}
-			case 3 :
-				ns = new NamespaceService(commandNamespaceConfigurationVersion.namespace,
+			case "nscv" :
+				ns = new NamespaceService(commandNamespaceConfigurationVersion.section,
 						commandNamespaceConfigurationVersion.edgerc);
-				var13 = commandNamespaceConfigurationVersion.type;
-				var14 = -1;
-				switch (var13.hashCode()) {
-					case -1996763020 :
-						if (var13.equals("deactivate")) {
-							var14 = 2;
-						}
-						break;
-					case -1655974669 :
-						if (var13.equals("activate")) {
-							var14 = 3;
-						}
-						break;
-					case -1352294148 :
-						if (var13.equals("create")) {
-							var14 = 1;
-						}
-						break;
-					case 3322014 :
-						if (var13.equals("list")) {
-							var14 = 0;
-						}
-						break;
-					case 1515627643 :
-						if (var13.equals("list-operations")) {
-							var14 = 4;
-						}
-				}
 
-				switch (var14) {
-					case 0 :
-						System.out.println(
+				switch (commandNamespaceConfigurationVersion.type) {
+					case "list" :
+						System.out.println(jsonPrettyPrint(
 								ns.getVersionsNamespaceConfiguration(commandNamespaceConfigurationVersion.namespace,
-										commandNamespaceConfigurationVersion.jurisdiction));
+										commandNamespaceConfigurationVersion.jurisdiction)));
 						System.exit(0);
 						return;
-					case 1 :
-						System.out.println(ns.postCreateVersionOfNamespaceConfiguration(
+					case "create" :
+						System.out.println(jsonPrettyPrint(ns.postCreateVersionOfNamespaceConfiguration(
 								commandNamespaceConfigurationVersion.namespace,
 								commandNamespaceConfigurationVersion.jurisdiction,
-								commandNamespaceConfigurationVersion.requestBody));
+								commandNamespaceConfigurationVersion.requestBody)));
 						System.exit(0);
 						return;
-					case 2 :
-						System.out.println(ns.putDeactivateVersionOfNamespaceConfiguration(
+					case "deactivate" :
+						System.out.println(jsonPrettyPrint(ns.putDeactivateVersionOfNamespaceConfiguration(
 								commandNamespaceConfigurationVersion.namespace,
 								commandNamespaceConfigurationVersion.jurisdiction,
-								Integer.toString(commandNamespaceConfigurationVersion.activationState)));
+								Integer.toString(commandNamespaceConfigurationVersion.activationState))));
 						System.exit(0);
 						return;
-					case 3 :
-						System.out.println(ns.putActivateVersionOfNamespaceConfiguration(
+					case "activate" :
+						System.out.println(jsonPrettyPrint(ns.putActivateVersionOfNamespaceConfiguration(
 								commandNamespaceConfigurationVersion.namespace,
 								commandNamespaceConfigurationVersion.jurisdiction,
 								commandNamespaceConfigurationVersion.version,
-								Integer.toString(commandNamespaceConfigurationVersion.activationState)));
+								Integer.toString(commandNamespaceConfigurationVersion.activationState))));
 						System.exit(0);
 						return;
-					case 4 :
-						System.out.println(ns.getListAllOperationsForConfigurationVersions(
+					case "list-operations" :
+						System.out.println(jsonPrettyPrint(ns.getListAllOperationsForConfigurationVersions(
 								commandNamespaceConfigurationVersion.namespace,
-								commandNamespaceConfigurationVersion.jurisdiction));
+								commandNamespaceConfigurationVersion.jurisdiction)));
 						System.exit(0);
 						return;
 					default :
@@ -253,7 +159,13 @@ public class CLI {
 				}
 			default :
 				System.out.println("please use a command:");
-		}
+		}	
 
+	}
+	private static String jsonPrettyPrint(String uglyJSONString){
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		JsonParser jp = new JsonParser();
+		JsonElement je = jp.parse(uglyJSONString);
+		return gson.toJson(je);
 	}
 }

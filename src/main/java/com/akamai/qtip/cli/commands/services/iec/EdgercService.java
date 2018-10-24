@@ -1,8 +1,5 @@
 package com.akamai.qtip.cli.commands.services.iec;
 
-import com.akamai.edgegrid.signer.ClientCredential;
-import com.akamai.edgegrid.signer.apachehttpclient.ApacheHttpClientEdgeGridInterceptor;
-import com.akamai.edgegrid.signer.apachehttpclient.ApacheHttpClientEdgeGridRoutePlanner;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -26,15 +24,24 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.ini4j.InvalidFileFormatException;
 import org.ini4j.Wini;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.akamai.edgegrid.signer.ClientCredential;
+import com.akamai.edgegrid.signer.apachehttpclient.ApacheHttpClientEdgeGridInterceptor;
+import com.akamai.edgegrid.signer.apachehttpclient.ApacheHttpClientEdgeGridRoutePlanner;
 
 public class EdgercService {
+	
+    // Define a static logger variable so that it references the
+    // Logger instance named "MyApp".
+    private static final Logger logger = LogManager.getLogger(EdgercService.class);
+    
 	private String apiClientSecret;
 	private String apiHost;
 	private String apiAccessToken;
@@ -48,10 +55,13 @@ public class EdgercService {
 	private Wini edgerc;
 	private Wini appConfigProperties;
 	private ClientCredential apiCredential;
-	private Logger logger;
+	
+
+	
 
 	public EdgercService(String apiClientName, String edgercFilePath) {
-		this.setLogger(LoggerFactory.getLogger(EdgercService.class));
+		//logger.trace("Entering EdgercService.");
+		//logger.info("Entering EdgercService.");
 		this.initEdgercFile(edgercFilePath);
 		this.setApiClientSecret(this.getEdgerc().get(apiClientName, "client_secret"));
 		this.setApiHost(this.getEdgerc().get(apiClientName, "host"));
@@ -347,13 +357,5 @@ public class EdgercService {
 
 	public void setApiCredential(ClientCredential apiCredential) {
 		this.apiCredential = apiCredential;
-	}
-
-	public Logger getLogger() {
-		return this.logger;
-	}
-
-	public void setLogger(Logger logger) {
-		this.logger = logger;
 	}
 }

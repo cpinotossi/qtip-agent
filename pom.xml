@@ -18,37 +18,16 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			      <plugin>
-        <groupId>org.xolstice.maven.plugins</groupId>
-        <artifactId>protobuf-maven-plugin</artifactId>
-        <version>0.6.1</version>
-        <configuration>
-          <protocExecutable>/usr/local/bin/protoc</protocExecutable>
-        </configuration>
-        <!-- configuration>
-          <protocExecutable>/usr/local/Cellar/protobuf/3.6.1/bin/protoc</protocExecutable>
-        </configuration-->
-        
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>test-compile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      
-			<!-- plugin>
+			<plugin>
 				<groupId>org.xolstice.maven.plugins</groupId>
 				<artifactId>protobuf-maven-plugin</artifactId>
-				<version>0.5.1</version>
+				<version>0.6.1</version>
 				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:3.6.1:exe:osx-x86_64</protocArtifact>
-					<sourceDirectory>${basedir}/src/resources/proto</sourceDirectory>
-					<targetPackage>com.akamai.qtip.Messages</targetPackage>
-					<outputDirectory>${basedir}/src/main/java</outputDirectory>
+					<protocExecutable>/usr/local/bin/protoc</protocExecutable>
 				</configuration>
+				<!-- configuration> <protocExecutable>/usr/local/Cellar/protobuf/3.6.1/bin/protoc</protocExecutable> 
+					</configuration -->
+
 				<executions>
 					<execution>
 						<goals>
@@ -57,7 +36,8 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin-->
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -149,34 +129,48 @@
 			<version>4.5.6</version>
 		</dependency>
 
-		<!-- dependency> <groupId>org.apache.logging.log4j</groupId> <artifactId>log4j-api</artifactId> 
-			<version>2.11.1</version> </dependency> <dependency> <groupId>org.apache.logging.log4j</groupId> 
-			<artifactId>log4j-core</artifactId> <version>2.11.1</version> </dependency -->
-		<!-- dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
-			<version>1.8.0-beta2</version> </dependency -->
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
+		<!-- dependency> <groupId>org.apache.httpcomponents.client5</groupId> <artifactId>httpclient5</artifactId> 
+			<version>5.0-alpha1</version> </dependency -->
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.11.1</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-nop -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-nop</artifactId>
 			<version>1.7.25</version>
-			<scope>test</scope>
+			<!--scope>test</scope -->
 		</dependency>
-
-
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
-			<!--scope>test</scope -->
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.0.2</version>
-			<!--scope>test</scope -->
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -217,12 +211,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>22.0</version>
@@ -247,6 +235,17 @@
 		</dependency>
 
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-bom</artifactId>
+				<version>2.11.1</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

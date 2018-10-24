@@ -58,7 +58,7 @@ public class MQTTService {
 	    		System.out.println("MESSAGE FROM "+topic+": " +
 	            new String(message.getPayload())+" with this qos: " +
 	            Integer.toString(message.getQos()));
-				System.exit(0);
+				//System.exit(0);
 	    	}
 
 	    	@Override

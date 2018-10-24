@@ -6,7 +6,7 @@ import com.beust.jcommander.Parameters;
 @Parameters(commandDescription = "Subscribe and Publish via MQTT Protocol")
 public class CommandClientMQTT {
 	@Parameter(names = {"--message",
-			"-m"}, description = "Hostname (Property) referenced inside an akamai configuration.", required = false)
+			"-m"}, description = "Message", required = false)
 	public String message;
 	@Parameter(names = {"--publish",
 			"-p"}, description = "By default we will subscribe, if you like to publish change the value to true")
