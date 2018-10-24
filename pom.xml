@@ -5,9 +5,10 @@
 	<groupId>qtip</groupId>
 	<artifactId>qtip</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<build>
 		<!-- TODO: install https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-osx-x86_64.zip -->
-		<sourceDirectory>src</sourceDirectory>
+		<!-- sourceDirectory>src</sourceDirectory -->
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -17,12 +18,36 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<plugin>
+			      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.6.1</version>
+        <configuration>
+          <protocExecutable>/usr/local/bin/protoc</protocExecutable>
+        </configuration>
+        <!-- configuration>
+          <protocExecutable>/usr/local/Cellar/protobuf/3.6.1/bin/protoc</protocExecutable>
+        </configuration-->
+        
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>
+              <goal>test-compile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
+			<!-- plugin>
 				<groupId>org.xolstice.maven.plugins</groupId>
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>0.5.1</version>
 				<configuration>
 					<protocArtifact>com.google.protobuf:protoc:3.6.1:exe:osx-x86_64</protocArtifact>
+					<sourceDirectory>${basedir}/src/resources/proto</sourceDirectory>
+					<targetPackage>com.akamai.qtip.Messages</targetPackage>
+					<outputDirectory>${basedir}/src/main/java</outputDirectory>
 				</configuration>
 				<executions>
 					<execution>
@@ -32,31 +57,32 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin-->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<finalName>qtipcli</finalName>
-					<outputDirectory>${basedir}/</outputDirectory>
-					<archive>
-						<manifest>
-							<mainClass>
-								com.akamai.qtip.cli.CLI
-							</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
 				<executions>
 					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
-						<phase>package</phase> <!-- bind to the packaging phase -->
+						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<configuration>
+							<finalName>qtipcli</finalName>
+							<outputDirectory>${basedir}/</outputDirectory>
+							<archive>
+								<manifest>
+									<mainClass>
+										com.akamai.qtip.cli.CLI
+									</mainClass>
+								</manifest>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -70,13 +96,12 @@
 		</repository>
 	</repositories>
 	<dependencies>
-		
+
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 			<version>1.0.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -109,52 +134,116 @@
 			<version>1.60</version>
 		</dependency>
 
-		
+
 		<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>3.4.0</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-		<!-- dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>4.5.6</version>
-		</dependency-->
 
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc -->
 		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>fluent-hc</artifactId>
-		    <version>4.5.6</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>fluent-hc</artifactId>
+			<version>4.5.6</version>
 		</dependency>
-		
+
+		<!-- dependency> <groupId>org.apache.logging.log4j</groupId> <artifactId>log4j-api</artifactId> 
+			<version>2.11.1</version> </dependency> <dependency> <groupId>org.apache.logging.log4j</groupId> 
+			<artifactId>log4j-core</artifactId> <version>2.11.1</version> </dependency -->
+		<!-- dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-log4j12</artifactId> 
+			<version>1.8.0-beta2</version> </dependency -->
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-nop -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<version>1.7.25</version>
+			<scope>test</scope>
+		</dependency>
+
+
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
-			<!--scope>test</scope-->
+			<!--scope>test</scope -->
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.0.2</version>
-			<!--scope>test</scope-->
+			<!--scope>test</scope -->
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.16.18</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
 			<version>1.72</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.ini4j</groupId>
+			<artifactId>ini4j</artifactId>
+			<version>0.5.4</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.akamai.edgegrid/edgegrid-signer-core -->
+		<dependency>
+			<groupId>com.akamai.edgegrid</groupId>
+			<artifactId>edgegrid-signer-core</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.akamai.edgegrid/edgegrid-signer-apache-http-client -->
+		<dependency>
+			<groupId>com.akamai.edgegrid</groupId>
+			<artifactId>edgegrid-signer-apache-http-client</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.akamai.edgegrid/edgegrid-signer-async-http-client -->
+		<dependency>
+			<groupId>com.akamai.edgegrid</groupId>
+			<artifactId>edgegrid-signer-async-http-client</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>22.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codeartisans</groupId>
+			<artifactId>org.json</artifactId>
+			<version>20161124</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.2</version>
 		</dependency>
 
 	</dependencies>
