@@ -5,8 +5,6 @@ import com.akamai.qtip.cli.commands.Commands;
 import com.akamai.qtip.cli.commands.iec.CommandManageNamespaceConfiguration;
 import com.akamai.qtip.cli.commands.iec.CommandManageNamespaceConfigurationVersion;
 import com.akamai.qtip.cli.commands.iec.CommandManageReservedNamespace;
-import com.akamai.qtip.cli.commands.services.iec.MQTTService;
-import com.akamai.qtip.cli.commands.services.iec.NamespaceService;
 import com.beust.jcommander.JCommander;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,23 +41,23 @@ public class CLI {
 		}
 
 		String currentCmd = jc.getParsedCommand();
-		NamespaceService ns = null;
+		com.akamai.qtip.services.iec.NamespaceService ns = null;
 
 
 		switch (currentCmd) {
 			case "mqtt" :
-				MQTTService iecClient = new MQTTService();
+				com.akamai.qtip.services.iec.MQTTService iecClient = new com.akamai.qtip.services.iec.MQTTService();
 				URI uri = new URI(String.format("ssl://%s:8883", commandClientMQTT.domain));
 				if (commandClientMQTT.publish) {
-					iecClient.publish(commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic,
+					iecClient.publish(commandClientMQTT.clientIdName,commandClientMQTT.authgroupName, commandClientMQTT.clientid, commandClientMQTT.authgroup, commandClientMQTT.topic,
 							commandClientMQTT.message, commandClientMQTT.key, commandClientMQTT.repeat, uri);
 				} else {
-					iecClient.subscribe(commandClientMQTT.clientid, commandClientMQTT.authgroup,
+					iecClient.subscribe(commandClientMQTT.clientIdName,commandClientMQTT.authgroupName,commandClientMQTT.clientid, commandClientMQTT.authgroup,
 							commandClientMQTT.topic, commandClientMQTT.key, uri);
 				}
 				break;
 			case "rns" :
-				ns = new NamespaceService(commandReservedNamespace.section, commandReservedNamespace.edgerc);
+				ns = new com.akamai.qtip.services.iec.NamespaceService(commandReservedNamespace.section, commandReservedNamespace.edgerc);
 				switch (commandReservedNamespace.type) {
 					case "list" :
 						System.out.println(jsonPrettyPrint(ns.getListReservedNamespaces(Integer.toString(commandReservedNamespace.size),
@@ -80,7 +78,7 @@ public class CLI {
 						return;
 				}
 			case "nsc" :
-				ns = new NamespaceService(commandNamespaceConfiguration.section,
+				ns = new com.akamai.qtip.services.iec.NamespaceService(commandNamespaceConfiguration.section,
 						commandNamespaceConfiguration.edgerc);
 				switch (commandNamespaceConfiguration.type) {
 					case "list-all" :
@@ -116,7 +114,7 @@ public class CLI {
 						return;
 				}
 			case "nscv" :
-				ns = new NamespaceService(commandNamespaceConfigurationVersion.section,
+				ns = new com.akamai.qtip.services.iec.NamespaceService(commandNamespaceConfigurationVersion.section,
 						commandNamespaceConfigurationVersion.edgerc);
 
 				switch (commandNamespaceConfigurationVersion.type) {

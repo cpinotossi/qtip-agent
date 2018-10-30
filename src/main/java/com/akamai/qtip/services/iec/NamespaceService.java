@@ -1,7 +1,9 @@
-package com.akamai.qtip.cli.commands.services.iec;
+package com.akamai.qtip.services.iec;
 
 import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
+
+import com.akamai.qtip.services.iec.EdgercService;
 
 public class NamespaceService extends EdgercService {
 	public NamespaceService(String apiClientName, String edgercFilePath) {

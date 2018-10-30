@@ -1,4 +1,4 @@
-package com.akamai.qtip.cli.commands.services.iec;
+package com.akamai.qtip.services.iec;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -62,6 +62,8 @@ public class EdgercService {
 	public EdgercService(String apiClientName, String edgercFilePath) {
 		//logger.trace("Entering EdgercService.");
 		//logger.info("Entering EdgercService.");
+        //PropertiesConfigurator is used to configure logger from properties file
+        //PropertyConfigurator.configure("log4j.properties");
 		this.initEdgercFile(edgercFilePath);
 		this.setApiClientSecret(this.getEdgerc().get(apiClientName, "client_secret"));
 		this.setApiHost(this.getEdgerc().get(apiClientName, "host"));

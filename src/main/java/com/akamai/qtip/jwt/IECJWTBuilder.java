@@ -55,13 +55,20 @@ public class IECJWTBuilder {
 		return this;
 	}
 
-	public IECJWTBuilder setClientId(String clientId) {
-		this.jws.claim("client-id", clientId);
+	public IECJWTBuilder setClientId(String clientIdValue) {
+		return this.setClientId("client-id", clientIdValue);
+	}
+	public IECJWTBuilder setClientId(String clientIdName, String clientIdValue) {
+		this.jws.claim(clientIdName, clientIdValue);
 		return this;
 	}
 
-	public IECJWTBuilder setAuthGroups(String[] authGroups) {
-		this.jws.claim("auth-groups", String.join(";", authGroups));
+	public IECJWTBuilder setAuthGroups(String[] authGroupsValues) {
+		return this.setAuthGroups("auth-groups", authGroupsValues);
+	}
+	
+	public IECJWTBuilder setAuthGroups(String authGroupName, String[] authGroupsValues) {
+		this.jws.claim(authGroupName, String.join(";", authGroupsValues));
 		return this;
 	}
 

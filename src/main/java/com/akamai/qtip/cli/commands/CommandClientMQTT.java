@@ -24,4 +24,10 @@ public class CommandClientMQTT {
 	public String domain;
 	@Parameter(names = {"--repeat", "-r"}, description = "Number of times to repeate the message", required = false)
 	public int repeat = 1;
+	
+	@Parameter(names = {"--clientid-name",}, description = "Name of the client id JWT claim", required = false)
+	public String clientIdName="client-id";
+	@Parameter(names = {"--authgroup-name",}, description = "Name of the Authorization Group JWT claim", required = false)
+	public String authgroupName="auth-groups";	
+	
 }
