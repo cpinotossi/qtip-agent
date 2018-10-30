@@ -53,7 +53,7 @@ public class MQTTService {
 
 			for (int i = 0; i < repeat; ++i) {
 				System.out.println("Repeat#" + i + " msg:" + msg);
-				msg = "[" + timeStampMillis + "|" + i +"]:" + message;
+				msg = "[" + timeStampMillis + " | #:" + i +"]:" + message;
 				client.publish(topic, msg.getBytes(), 2, false);
 			}
 			client.disconnect();
