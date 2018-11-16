@@ -11,6 +11,7 @@ import java.time.Instant;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
@@ -20,19 +21,22 @@ import org.eclipse.paho.client.mqttv3.util.Debug;
 import java.util.logging.Logger;
 
 public class MQTTService {
-	//private static final Logger logger = LogManager.getLogger(EdgercService.class);
-	
-	public void publish(String clientIdName, String authGroupName, String clientId, String authGroup, String topic, String message, String pathtothekey, URI uri)
-			throws Exception {
+	// private static final Logger logger =
+	// LogManager.getLogger(EdgercService.class);
+
+	public void publish(String clientIdName, String authGroupName, String clientId, String authGroup, String topic,
+			String message, String pathtothekey, URI uri) throws Exception {
 		this.publish(clientIdName, authGroupName, clientId, authGroup, topic, message, pathtothekey, 1, uri);
 	}
 
-
-	public void publish(String clientIdName, String authGroupName, String clientId, String authGroup, String topic, String message, String pathtothekey,
-			int repeat, URI uri) throws Exception{
+	public void publish(String clientIdName, String authGroupName, String clientId, String authGroup, String topic,
+			String message, String pathtothekey, int repeat, URI uri) throws Exception {
+		// Generate JWT
 		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
-		jwtBuilder.setAuthGroups(authGroupName ,new String[]{authGroup}).setSigningKey(this.getKey(pathtothekey));
+		jwtBuilder.setAuthGroups(authGroupName, new String[] { authGroup }).setClientId(clientIdName, clientId)
+				.setSigningKey(this.getKey(pathtothekey));
 		String jwt = jwtBuilder.build();
+		// Build MQTT Client
 		ClientBuilder clientBuilder = new ClientBuilder();
 		MqttClient client = clientBuilder.addAuthGroup(authGroup).setClientId(clientId).setBrokerURI(uri).setJWT(jwt)
 				.build();
@@ -53,7 +57,7 @@ public class MQTTService {
 
 			for (int i = 0; i < repeat; ++i) {
 				System.out.println("Repeat#" + i + " msg:" + msg);
-				msg = "[" + timeStampMillis + " | #:" + i +"]:" + message;
+				msg = "[" + timeStampMillis + " | #:" + i + "]:" + message;
 				client.publish(topic, msg.getBytes(), 2, false);
 			}
 			client.disconnect();
@@ -62,54 +66,56 @@ public class MQTTService {
 			e.printStackTrace();
 		} catch (MqttException e) {
 			// TODO Auto-generated catch block
-			
-			//Logger.getLogger(this.getClass().getName()).fine("Timed out waiting for the message to send...");
+
+			// Logger.getLogger(this.getClass().getName()).fine("Timed out waiting for the
+			// message to send...");
 			debug.dumpClientDebug();
 			Logger.getLogger(this.getClass().getName()).severe(e.toString());
 			e.printStackTrace();
-			
-		} finally{
+
+		} finally {
 			System.exit(0);
 		}
 	}
 
+	public void subscribe(String clientIdName, String authGroupName, String clientId, String authGroup, String topic,
+			String pathtothekey, URI uri) throws Exception {
+		// callback functions defined, when certain MQTT events take place
+		MqttCallback callback = new MqttCallback() {
+			@Override
+			public void messageArrived(String topic, MqttMessage message) throws Exception {
+				System.out.println("MESSAGE FROM " + topic + ": " + new String(message.getPayload())
+						+ " with this qos: " + Integer.toString(message.getQos()));
+				// System.exit(0);
+			}
 
-    
-	public void subscribe(String clientIdName, String authGroupName, String clientId, String authGroup, String topic, String pathtothekey, URI uri) throws Exception {
-		//callback functions defined, when certain MQTT events take place
-	    MqttCallback callback = new MqttCallback() {
-	    	@Override
-	    	public void messageArrived(String topic, MqttMessage message) throws Exception {
-	    		System.out.println("MESSAGE FROM "+topic+": " +
-	            new String(message.getPayload())+" with this qos: " +
-	            Integer.toString(message.getQos()));
-				//System.exit(0);
-	    	}
+			@Override
+			public void deliveryComplete(IMqttDeliveryToken token) {
+			}
 
-	    	@Override
-	    	public void deliveryComplete(IMqttDeliveryToken token) { }
-
-	    	@Override
-	    	public void connectionLost(Throwable cause) {
-	    				System.out.println("Exception "+cause);
-	    				System.exit(0);
-	    	}
-	    };
-      IECJWTBuilder jwtBuilder = new IECJWTBuilder();
-      jwtBuilder.setAuthGroups(authGroupName,new String[]{authGroup}).setSigningKey(this.getKey(pathtothekey));
-      String jwt = jwtBuilder.build();
-      ClientBuilder clientBuilder = new ClientBuilder();
-      MqttClient client = clientBuilder.addAuthGroup(authGroup).setCallback(callback).setClientId(clientId).setBrokerURI(uri).setJWT(jwt).build();
-      System.out.println("START subscribe");
-      System.out.println(clientId);
-      System.out.println(authGroup);
-      System.out.println(topic);
-      System.out.println(uri);
-      System.out.println(jwt);
-      System.out.println("connect");
-      client.connect();
-      client.subscribe(topic);
-   }
+			@Override
+			public void connectionLost(Throwable cause) {
+				System.out.println("Exception " + cause);
+				System.exit(0);
+			}
+		};
+		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
+		jwtBuilder.setAuthGroups(authGroupName, new String[] { authGroup }).setClientId(clientIdName, clientId)
+				.setSigningKey(this.getKey(pathtothekey));
+		String jwt = jwtBuilder.build();
+		ClientBuilder clientBuilder = new ClientBuilder();
+		MqttClient client = clientBuilder.addAuthGroup(authGroup).setCallback(callback).setClientId(clientId)
+				.setBrokerURI(uri).setJWT(jwt).build();
+		System.out.println("START subscribe");
+		System.out.println(clientId);
+		System.out.println(authGroup);
+		System.out.println(topic);
+		System.out.println(uri);
+		System.out.println(jwt);
+		System.out.println("connect");
+		client.connect();
+		client.subscribe(topic);
+	}
 
 	private String getKey(String filename) throws IOException {
 		String strKeyPEM = "";

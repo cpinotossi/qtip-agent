@@ -26,7 +26,7 @@ public class Agent implements Runnable, MqttCallback {
 	private Map<String, List<MessageHandler<?>>> messageHandlers = new HashMap<String, List<MessageHandler<?>>>();
 
 	public Agent() throws Exception {
-		mqtt = IEC.mqttClient(getJurisdiction(), new String[] {"chatter:sub", "measures:sub"});
+		mqtt = IEC.mqttClient(getJurisdiction(), new String[] {"chatter:sub", "measures:sub"}, true);
 		chatterPublisher = new AsyncPublisher(getJurisdiction(),new String[] {"measures:pub"}, Topic.CHATTER);
 		beaconPublisher = new AsyncPublisher(getJurisdiction(),new String[] {"chatter:pub"}, Topic.BEACONS);
 		setupHello();

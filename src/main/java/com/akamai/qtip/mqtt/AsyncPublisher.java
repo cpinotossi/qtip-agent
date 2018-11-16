@@ -25,7 +25,7 @@ public class AsyncPublisher extends Thread {
 	private Topic topic;
 
 	public AsyncPublisher(Jurisdiction jurisdiction, String[] authGroups, Topic topic) throws Exception {
-		this.client = IEC.mqttClient(jurisdiction, authGroups);
+		this.client = IEC.mqttClient(jurisdiction, authGroups, true);
 		this.setName(this.getClass().getName());
 		this.topic = topic;
 		this.queue = new LinkedBlockingQueue<Envelope>();

@@ -22,11 +22,17 @@ public class IEC {
 		return jwtBuilder.build();
 	}
 
-	static public MqttClient mqttClient(Jurisdiction jurisdiction, String[] authGroups) throws Exception {
+	static public MqttClient mqttClient(Jurisdiction jurisdiction, String[] authGroups, boolean isTLS) throws Exception {
 		ClientBuilder clientBuilder = new ClientBuilder();
 		String jwt = jwt(MqttClient.generateClientId(), authGroups);
-		clientBuilder.setBrokerURI(Broker.getURI(jurisdiction)).addAuthGroups(authGroups)
-				.setJWT(jwt);
+		if(isTLS) {
+			clientBuilder.setBrokerURI(Broker.getURITLS(jurisdiction)).addAuthGroups(authGroups)
+			.setJWT(jwt);			
+		}else {
+			clientBuilder.setBrokerURI(Broker.getURIWebsocket(jurisdiction)).addAuthGroups(authGroups)
+			.setJWT(jwt);						
+		}
+
 		return clientBuilder.build();
 	}
 }
