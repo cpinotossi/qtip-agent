@@ -1,9 +1,9 @@
 # Qtip-Agent
-Qtip Agent is a Framwork which will help to execut Performance Test based on MQTT.
+Qtip Agent is a Framework which will help to execute Performance Test based on MQTT.
 
 
 ## Status
-Work in progess. The current release does only work in combination with the Akamai MQTT Service "IoT Edge Connect".
+Work in progress. The current release does only work in combination with the Akamai MQTT Service "IoT Edge Connect".
 
 ## Team
 * Anthony Hogg (Enterprise Architect @ Akamai)
@@ -17,8 +17,8 @@ Work in progess. The current release does only work in combination with the Akam
 Call Help as follow:
 
 ```
-$java -jar qtipcli.jar -h                                                                                                                                                             
-Expected a command, got -h
+$java -jar qtipcli.jar -help
+Expected a command, got -help
 Usage: <main class> [options] [command] [command options]
   Options:
     --help
@@ -30,20 +30,26 @@ Usage: <main class> [options] [command] [command options]
         * --authgroup, -a
             Authorization Group used in combination with Akamai IoT Edge
             Connect
+          --authgroup-name
+            Name of the Authorization Group JWT claim
+            Default: auth-groups
         * --clientid, -c
             MQTT Client ID
+          --clientid-name
+            Name of the client id JWT claim
+            Default: client-id
         * --domain, -d
             Domain/Hostname of the mqtt server
         * --key, -k
             Path to the key file
           --message, -m
-            Hostname (Property) referenced inside an akamai configuration.
+            Message
           --publish, -p
             By default we will subscribe, if you like to publish change the
             value to true
             Default: false
           --repeat, -r
-            Number of times to repeate the message
+            Number of times to repeat the message
             Default: 1
         * --topic, -t
             MQTT Topic
@@ -134,7 +140,7 @@ Usage: <main class> [options] [command] [command options]
             Mode (list-all|create|get|update|delete)
             Default: list
 ```
-            
+
 
 ### CLI mqtt
 
@@ -151,64 +157,59 @@ Usage: <main class> [options] [command] [command options]
         * --key, -k
             Path to the key file
           --message, -m
-            Hostname (Property) referenced inside an akamai configuration.
+            Hostname (Property) referenced inside an Akamai configuration.
           --publish, -p
             By default we will subscribe, if you like to publish change the
             value to true
             Default: false
           --repeat, -r
-            Number of times to repeate the message
+            Number of times to repeat the message
             Default: 1
         * --topic, -t
             MQTT Topic
 ```
 
-#### CLI mqtt example subscribe
+#### CLI mqtt example subscribe with wildcards
 ```
-$ java -jar qtipcli.jar mqtt -c client1 -a "measures:sub" -t "catchpoint/test" -k ./private/qtip.a2s.ninja.key -d qtip-eu.a2s.ninja
+$ java -jar qtipcli.jar mqtt -c client1 -a "subTopic" -t "prd/FlightUpdate/#" -k ./private/edgegate_iec.key -d iec.hebe.io --clientid-name "clientID" --authgroup-name "authGroups"    ⏎
 START subscribe
 client1
-measures:sub
-catchpoint/test
-ssl://qtip-eu.a2s.ninja:8883
-connect
-MESSAGE FROM catchpoint/test: Example payload with this qos: 0
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-MESSAGE FROM catchpoint/test: [1539962313788]:huhu with this qos: 1
-```
-In case you would like to use MQTT Wildcard just use the "#" as follow:
+subTopic
+prd/FlightUpdate/#
+ssl://iec.hebe.io:8883
 
-```
-$ java -jar qtipcli.jar mqtt -c client1 -a "measures:sub" -t "catchpoint/#" -k ./private/qtip.a2s.ninja.key -d qtip-eu.a2s.ninja
+connect
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:1]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:2]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:3]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:4]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:5]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:6]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:7]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:8]:hello world with this qos: 1
+MESSAGE FROM prd/FlightUpdate/test2/: [1542385113955 | #:9]:hello world with this qos: 1
 ```
 
 
 #### CLI mqtt example Publish
 ```
-$ java -jar qtipcli.jar mqtt -c client2 -a "measures:pub" -t "catchpoint/test" -p -m "huhu" -k ./private/qtip.a2s.ninja.key -r 10 -d qtip-eu.a2s.ninja
+$ java -jar qtipcli.jar mqtt -c client2 -a "pubTopic" -t "prd/FlightUpdate/test2/" -k ./private/edgegate_iec.key -d iec.hebe.io --clientid-name "clientID" --authgroup-name "authGroups" -p -r 10 -m "hello world"
 START publish
 client2
-measures:pub
-catchpoint/test
-ssl://qtip-eu.a2s.ninja:8883
+pubTopic
+prd/FlightUpdate/test2/
+ssl://iec.hebe.io:8883
+
 connect
-Repeat#0 msg:[1539962313788]:huhu
-Repeat#1 msg:[1539962313788]:huhu
-Repeat#2 msg:[1539962313788]:huhu
-Repeat#3 msg:[1539962313788]:huhu
-Repeat#4 msg:[1539962313788]:huhu
-Repeat#5 msg:[1539962313788]:huhu
-Repeat#6 msg:[1539962313788]:huhu
-Repeat#7 msg:[1539962313788]:huhu
-Repeat#8 msg:[1539962313788]:huhu
-Repeat#9 msg:[1539962313788]:huhu
+Repeat#1 msg:[1542385113955 | #:0]:hello world
+Repeat#2 msg:[1542385113955 | #:1]:hello world
+Repeat#3 msg:[1542385113955 | #:2]:hello world
+Repeat#4 msg:[1542385113955 | #:3]:hello world
+Repeat#5 msg:[1542385113955 | #:4]:hello world
+Repeat#6 msg:[1542385113955 | #:5]:hello world
+Repeat#7 msg:[1542385113955 | #:6]:hello world
+Repeat#8 msg:[1542385113955 | #:7]:hello world
+Repeat#9 msg:[1542385113955 | #:8]:hello world
 ```
 
 ### CLI support of Akamai IoT Edge Connect
@@ -437,6 +438,3 @@ java -jar qtipcli.jar nscv --edgerc /Users/cpinotos/.edgerc -t list -n iec_hebe_
   }
 ]
 ```
-
-
-
