@@ -31,33 +31,26 @@ public class MQTTService {
 
 	public void publish(String clientIdName, String authGroupName, String clientId, String authGroup, String topic,
 			String message, String pathtothekey, int repeat, URI uri) throws Exception {
-		// Generate JWT
-		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
-		jwtBuilder.setAuthGroups(authGroupName, new String[] { authGroup }).setClientId(clientIdName, clientId)
-				.setSigningKey(this.getKey(pathtothekey));
-		String jwt = jwtBuilder.build();
-		// Build MQTT Client
-		ClientBuilder clientBuilder = new ClientBuilder();
-		MqttClient client = clientBuilder.addAuthGroup(authGroup).setClientId(clientId).setBrokerURI(uri).setJWT(jwt)
-				.build();
-		Debug debug = client.getDebug();
 		System.out.println("START publish");
-		System.out.println(clientId);
-		System.out.println(authGroup);
-		System.out.println(topic);
-		System.out.println(uri);
-		System.out.println(jwt);
-		System.out.println(message);
-		System.out.println("connect");
+		System.out.println("Client ID\t:"+ clientId);
+		System.out.println("Auth Group\t:"+authGroup);
+		System.out.println("Topic:\t"+topic);
+		System.out.println("Host:\t"+uri);
+		System.out.println("Message:\t"+message);
+		System.out.println("----------------------");
+		System.out.println("STATUS: init Client");
+		MqttClient client = getClient(clientIdName, authGroupName, clientId, authGroup, pathtothekey, uri, null);
 		try {
+			System.out.println("STATUS: try to connect");
 			client.connect();
+			System.out.println("STATUS: connected");
 			Instant instant = Instant.now();
 			long timeStampMillis = instant.toEpochMilli();
 			String msg = "";
 
 			for (int i = 0; i < repeat; ++i) {
-				System.out.println("Repeat#" + i + " msg:" + msg);
-				msg = "[" + timeStampMillis + " | #:" + i + "]:" + message;
+				msg = "[" + timeStampMillis + "|" + clientId + "|" + i + "]: " + message;
+				System.out.println("MESSAGE TO " + topic +  ": " + msg);
 				client.publish(topic, msg.getBytes(), 2, false);
 			}
 			client.disconnect();
@@ -65,11 +58,6 @@ public class MQTTService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MqttException e) {
-			// TODO Auto-generated catch block
-
-			// Logger.getLogger(this.getClass().getName()).fine("Timed out waiting for the
-			// message to send...");
-			debug.dumpClientDebug();
 			Logger.getLogger(this.getClass().getName()).severe(e.toString());
 			e.printStackTrace();
 
@@ -79,13 +67,12 @@ public class MQTTService {
 	}
 
 	public void subscribe(String clientIdName, String authGroupName, String clientId, String authGroup, String topic,
-			String pathtothekey, URI uri) throws Exception {
+			String pathtothekey, URI uri) throws Exception{
 		// callback functions defined, when certain MQTT events take place
 		MqttCallback callback = new MqttCallback() {
 			@Override
 			public void messageArrived(String topic, MqttMessage message) throws Exception {
-				System.out.println("MESSAGE FROM " + topic + ": " + new String(message.getPayload())
-						+ " with this qos: " + Integer.toString(message.getQos()));
+				System.out.println("MESSAGE FROM " + topic + ": " + new String(message.getPayload()));
 				// System.exit(0);
 			}
 
@@ -99,22 +86,59 @@ public class MQTTService {
 				System.exit(0);
 			}
 		};
-		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
-		jwtBuilder.setAuthGroups(authGroupName, new String[] { authGroup }).setClientId(clientIdName, clientId)
-				.setSigningKey(this.getKey(pathtothekey));
-		String jwt = jwtBuilder.build();
-		ClientBuilder clientBuilder = new ClientBuilder();
-		MqttClient client = clientBuilder.addAuthGroup(authGroup).setCallback(callback).setClientId(clientId)
-				.setBrokerURI(uri).setJWT(jwt).build();
 		System.out.println("START subscribe");
-		System.out.println(clientId);
-		System.out.println(authGroup);
-		System.out.println(topic);
-		System.out.println(uri);
-		System.out.println(jwt);
-		System.out.println("connect");
-		client.connect();
+		System.out.println("Client ID:\t"+ clientId);
+		System.out.println("Auth Group:\t"+authGroup);
+		System.out.println("Topic:\t"+topic);
+		System.out.println("Host:\t"+uri);
+		System.out.println("----------------------");
+		System.out.println("STATUS: init Client");
+		MqttClient client = getClient(clientIdName, authGroupName, clientId, authGroup, pathtothekey, uri, callback);
+		try {
+			System.out.println("STATUS: try to connect");
+			client.connect();
+			System.out.println("STATUS: connected to "+client.getCurrentServerURI());
+		} catch (MqttException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("STATUS: subscribe");
 		client.subscribe(topic);
+	}
+	
+	private MqttClient getClient(String clientIdName, 
+			String authGroupName, 
+			String clientId, 
+			String authGroup,
+			String pathtothekey, 
+			URI uri, 
+			MqttCallback callback){
+		MqttClient client = null;
+		IECJWTBuilder jwtBuilder = new IECJWTBuilder();
+		try {
+			jwtBuilder.setAuthGroups(authGroupName, new String[] { authGroup }).setClientId(clientIdName, clientId)
+					.setSigningKey(this.getKey(pathtothekey));
+		} catch (IOException e) {
+			System.out.println("ERROR: Key file does not exist");
+			e.printStackTrace();
+		}
+		String jwt = jwtBuilder.build();
+		System.out.println("JWT:\t"+jwt);
+		ClientBuilder clientBuilder = new ClientBuilder();
+			try {
+				if(callback ==null) {
+					client = clientBuilder.addAuthGroup(authGroup).setClientId(clientId)
+							.setBrokerURI(uri).setJWT(jwt).build();
+				}else {
+					client = clientBuilder.addAuthGroup(authGroup).setCallback(callback).setClientId(clientId)
+							.setBrokerURI(uri).setJWT(jwt).build();					
+				}
+			} catch (Exception e) {
+				System.out.println("ERROR: Cannot create Mqtt client");
+				e.printStackTrace();
+			}
+
+		return client;
 	}
 
 	private String getKey(String filename) throws IOException {
