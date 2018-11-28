@@ -45,11 +45,10 @@ public class MQTTService {
 			client.connect();
 			System.out.println("STATUS: connected");
 			Instant instant = Instant.now();
-			long timeStampMillis = instant.toEpochMilli();
 			String msg = "";
 
 			for (int i = 0; i < repeat; ++i) {
-				msg = "[" + timeStampMillis + "|" + clientId + "|" + i + "]: " + message;
+				msg = message;
 				System.out.println("MESSAGE TO " + topic +  ": " + msg);
 				client.publish(topic, msg.getBytes(), 2, false);
 			}
